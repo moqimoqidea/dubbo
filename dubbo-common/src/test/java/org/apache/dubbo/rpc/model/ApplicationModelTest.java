@@ -30,12 +30,12 @@ import org.junit.jupiter.api.Test;
 /**
  * {@link ApplicationModel}
  */
-public class ApplicationModelTest {
+class ApplicationModelTest {
 
     @Test
-    public void testInitialize() {
+    void testInitialize() {
         FrameworkModel frameworkModel = new FrameworkModel();
-        ApplicationModel applicationModel = new ApplicationModel(frameworkModel);
+        ApplicationModel applicationModel = frameworkModel.newApplication();
 
         Assertions.assertEquals(applicationModel.getParent(), frameworkModel);
         Assertions.assertEquals(applicationModel.getScope(), ExtensionScope.APPLICATION);
@@ -60,7 +60,7 @@ public class ApplicationModelTest {
     }
 
     @Test
-    public void testDefaultApplication() {
+    void testDefaultApplication() {
         ApplicationModel applicationModel = ApplicationModel.defaultModel();
         FrameworkModel frameworkModel = applicationModel.getFrameworkModel();
 
@@ -75,9 +75,9 @@ public class ApplicationModelTest {
     }
 
     @Test
-    public void testModule() {
+    void testModule() {
         FrameworkModel frameworkModel = new FrameworkModel();
-        ApplicationModel applicationModel = new ApplicationModel(frameworkModel);
+        ApplicationModel applicationModel = frameworkModel.newApplication();
 
         ModuleModel defaultModule = applicationModel.getDefaultModule();
         ModuleModel internalModule = applicationModel.getInternalModule();
@@ -95,22 +95,22 @@ public class ApplicationModelTest {
     }
 
     @Test
-    public void testOfNullable() {
+    void testOfNullable() {
         ApplicationModel applicationModel = ApplicationModel.ofNullable(null);
         Assertions.assertEquals(ApplicationModel.defaultModel(), applicationModel);
         applicationModel.getFrameworkModel().destroy();
 
         FrameworkModel frameworkModel = new FrameworkModel();
-        ApplicationModel applicationModel1 = new ApplicationModel(frameworkModel);
+        ApplicationModel applicationModel1 = frameworkModel.newApplication();
         ApplicationModel applicationModel2 = ApplicationModel.ofNullable(applicationModel1);
         Assertions.assertEquals(applicationModel1, applicationModel2);
         frameworkModel.destroy();
     }
 
     @Test
-    public void testDestroy() {
+    void testDestroy() {
         FrameworkModel frameworkModel = new FrameworkModel();
-        ApplicationModel applicationModel = new ApplicationModel(frameworkModel);
+        ApplicationModel applicationModel = frameworkModel.newApplication();
 
         applicationModel.getDefaultModule();
         applicationModel.newModule();

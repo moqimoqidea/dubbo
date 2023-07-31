@@ -16,15 +16,19 @@
  */
 package org.apache.dubbo.config;
 
+import org.apache.dubbo.common.utils.CollectionUtils;
 import org.apache.dubbo.common.utils.StringUtils;
 import org.apache.dubbo.config.support.Parameter;
 import org.apache.dubbo.rpc.model.ApplicationModel;
 
+import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.apache.dubbo.common.constants.CommonConstants.DUBBO_PROTOCOL;
 import static org.apache.dubbo.common.constants.CommonConstants.SSL_ENABLED_KEY;
 import static org.apache.dubbo.common.constants.CommonConstants.THREAD_POOL_EXHAUSTED_LISTENERS_KEY;
+import static org.apache.dubbo.common.constants.LoggerCodeConstants.COMMON_UNEXPECTED_EXCEPTION;
 
 /**
  * ProtocolConfig
@@ -579,4 +583,29 @@ public class ProtocolConfig extends AbstractConfig {
     public void setExtProtocol(String extProtocol) {
         this.extProtocol = extProtocol;
     }
+
+    public void mergeProtocol(ProtocolConfig sourceConfig) {
+        if (sourceConfig == null) {
+            return;
+        }
+        Field[] targetFields = this.getClass().getDeclaredFields();
+        try {
+            Map<String, Object> protocolConfigMap = CollectionUtils.objToMap(sourceConfig);
+            for (Field targetField : targetFields) {
+                Optional.ofNullable(protocolConfigMap.get(targetField.getName())).ifPresent(value -> {
+                    try {
+                        targetField.setAccessible(true);
+                        if (targetField.get(this) == null) {
+                            targetField.set(this, value);
+                        }
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+        } catch (Exception e) {
+            logger.error(COMMON_UNEXPECTED_EXCEPTION, "", "", "merge protocol config fail, error: ", e);
+        }
+    }
+
 }
